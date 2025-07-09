@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Code, Megaphone, Users } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -15,7 +16,7 @@ export default function Home() {
                   Connect, Collaborate, Contribute
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  GDG Call Hub is the central place for Google Developer Groups
+                  GDG Connect is the central place for Google Developer Groups
                   to find speakers and volunteers for their events.
                 </p>
               </div>
@@ -29,8 +30,13 @@ export default function Home() {
               </div>
             </div>
             <div className="hidden lg:block">
-              <div className="w-full h-full bg-primary rounded-xl p-8 flex items-center justify-center">
-                <Megaphone className="w-48 h-48 text-primary-foreground/20" />
+              <div className="w-full h-full  rounded-xl p-8 flex items-center justify-center">
+                <Image
+                  src="/gdg-icon.svg"
+                  alt="GDG Icon"
+                  width={192}
+                  height={192}
+                />
               </div>
             </div>
           </div>
@@ -45,7 +51,7 @@ export default function Home() {
                 Key Features
               </div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">
-                Why GDG Call Hub?
+                Why GDG Call Connect?
               </h2>
               <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                 We streamline the process of organizing and participating in GDG

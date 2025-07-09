@@ -19,10 +19,9 @@ export default function ListingsPage() {
   const [calls, setCalls] = useState([]);
 
   useEffect(() => {
-    // Simulate async fetch
     setTimeout(() => {
       setCalls(mockCalls);
-    }, 300); // optional delay
+    }, 300);
   }, []);
 
   const formatDate = (dateString) => {
@@ -73,7 +72,7 @@ export default function ListingsPage() {
                     </CardDescription>
                   </div>
                   {call.deadline && (
-                    <div className="flex items-center text-sm text-orange-600 bg-orange-50 px-3 py-1 rounded-full">
+                    <div className="flex items-center text-sm  bg-orange-50 px-3 py-1 rounded-full">
                       <Calendar className="w-4 h-4 mr-1" />
                       Deadline: {formatDate(call.deadline)}
                     </div>

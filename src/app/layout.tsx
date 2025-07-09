@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "GDG Connect",
@@ -16,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full scrollbar-hide">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -32,7 +31,6 @@ export default function RootLayout({
       <body className="font-body antialiased flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow">{children}</main>
-        <Footer />
       </body>
     </html>
   );
