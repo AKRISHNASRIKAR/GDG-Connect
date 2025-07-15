@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { getSuggestions } from "@/app/submit-call/actions";
+import { addCall } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles } from "lucide-react";
 
@@ -37,14 +39,62 @@ export default function SubmitCallForm() {
       format: "Online",
       location: "",
       tags: "",
+      contactEmail: "",
+      deadline: "",
     },
   });
 
   const { toast } = useToast();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const onSubmit = (data) => {
-    console.log("Form submitted:", data);
+  const onSubmit = async (data) => {
+    setSubmitting(true);
+    
+    try {
+      // Format the data to match your existing structure
+      const callData = {
+        eventName: data.title,
+        callType: data.type.toLowerCase(),
+        description: data.description,
+        format: data.format,
+        location: data.location,
+        tags: data.tags,
+        contactEmail: data.contactEmail,
+        deadline: data.deadline || null,
+      };
+
+      const result = await addCall(callData);
+
+      if (result.success) {
+        toast({
+          title: "Success!",
+          description: "Your call has been submitted successfully.",
+        });
+        
+        // Reset form
+        form.reset();
+        
+        // Redirect to calls page
+        router.push("/calls");
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to submit call.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleGenerate = async () => {
@@ -190,6 +240,41 @@ export default function SubmitCallForm() {
 
               <FormField
                 control={form.control}
+                name="contactEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contact Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="your-email@example.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="deadline"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Application Deadline (Optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
@@ -205,11 +290,13 @@ export default function SubmitCallForm() {
                 )}
               />
 
-              <Link href="/calls">
-                <Button type="submit" className="w-full">
-                  Submit Call
-                </Button>
-              </Link>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={submitting}
+              >
+                {submitting ? "Submitting..." : "Submit Call"}
+              </Button>
             </form>
           </Form>
         </div>
