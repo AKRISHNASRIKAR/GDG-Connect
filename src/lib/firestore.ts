@@ -5,10 +5,10 @@ import {
   doc,
   getDoc,
   getDocs,
+  addDoc,
+  serverTimestamp,
   query,
-  
   orderBy,
-
 } from "firebase/firestore";
 
 // Get all calls for generateStaticParams and general use
@@ -56,5 +56,45 @@ export async function getCallById(id: string) {
   } catch (error) {
     console.error("Error fetching call:", error);
     return null;
+  }
+}
+
+// Type definitions
+export interface CallData {
+  eventName: string;
+  callType: string;
+  description: string;
+  format: string;
+  location: string;
+  tags: string;
+  contactEmail: string;
+  deadline: string | null;
+}
+
+export interface CallResponse {
+  success: boolean;
+  id?: string;
+  error?: string;
+}
+
+// Add a new call
+export async function addCall(callData: CallData): Promise<CallResponse> {
+  try {
+    const docRef = await addDoc(collection(db, "calls"), {
+      ...callData,
+      createdAt: serverTimestamp(),
+      postedDate: serverTimestamp(),
+    });
+
+    return {
+      success: true,
+      id: docRef.id,
+    };
+  } catch (error) {
+    console.error("Error adding call:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to add call",
+    };
   }
 }

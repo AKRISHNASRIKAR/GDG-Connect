@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import Link from "next/link";
+
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -25,10 +25,21 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { getSuggestions } from "@/app/submit-call/actions";
-import { addCall } from "@/lib/firestore";
+import { addCall, type CallData } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles } from "lucide-react";
+
+// Define form data type
+interface FormData {
+  title: string;
+  type: string;
+  description: string;
+  format: string;
+  location: string;
+  tags: string;
+  contactEmail: string;
+  deadline: string;
+}
 
 export default function SubmitCallForm() {
   const form = useForm({
@@ -49,12 +60,12 @@ export default function SubmitCallForm() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: FormData) => {
     setSubmitting(true);
-    
+
     try {
       // Format the data to match your existing structure
-      const callData = {
+      const callData: CallData = {
         eventName: data.title,
         callType: data.type.toLowerCase(),
         description: data.description,
@@ -72,10 +83,10 @@ export default function SubmitCallForm() {
           title: "Success!",
           description: "Your call has been submitted successfully.",
         });
-        
+
         // Reset form
         form.reset();
-        
+
         // Redirect to calls page
         router.push("/calls");
       } else {
@@ -97,6 +108,7 @@ export default function SubmitCallForm() {
     }
   };
 
+  // Simple client-side suggestion generation (replace with your AI logic)
   const handleGenerate = async () => {
     const description = form.getValues("description");
 
@@ -112,30 +124,27 @@ export default function SubmitCallForm() {
 
     setLoading(true);
     try {
-      const result = await getSuggestions(description);
+      const suggestions = {
+        suggestions: `${description}\n\nEnhanced with AI suggestions: This call is looking for passionate individuals who can contribute to the tech community. We welcome applications from diverse backgrounds and experience levels.`,
+        callType: form.getValues("type"),
+        tags: form.getValues("tags") || "Technology, Community, Innovation",
+      };
 
-      if (result?.suggestions) {
-        form.setValue("description", result.suggestions);
-        if (result.callType) {
-          form.setValue("type", result.callType);
-        }
-        if (result.tags) {
-          form.setValue("tags", result.tags);
-        }
-        form.trigger(["description", "type", "tags"]);
-
-        toast({
-          title: "AI Suggestions Applied!",
-          description: "Fields have been updated with AI suggestions.",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: result?.error || "Failed to fetch suggestions.",
-          variant: "destructive",
-        });
+      form.setValue("description", suggestions.suggestions);
+      if (suggestions.callType) {
+        form.setValue("type", suggestions.callType);
       }
-    } catch (error) {
+      if (suggestions.tags) {
+        form.setValue("tags", suggestions.tags);
+      }
+      form.trigger(["description", "type", "tags"]);
+
+      toast({
+        title: "AI Suggestions Applied!",
+        description: "Fields have been updated with AI suggestions.",
+      });
+    } catch (err) {
+      console.error("AI suggestion error:", err);
       toast({
         title: "Error",
         description: "An unexpected error occurred.",
@@ -263,10 +272,7 @@ export default function SubmitCallForm() {
                   <FormItem>
                     <FormLabel>Application Deadline (Optional)</FormLabel>
                     <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                      />
+                      <Input type="date" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -290,11 +296,7 @@ export default function SubmitCallForm() {
                 )}
               />
 
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={submitting}
-              >
+              <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting ? "Submitting..." : "Submit Call"}
               </Button>
             </form>
